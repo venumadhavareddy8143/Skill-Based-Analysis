@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Student Quiz App</title>
+<meta name="description" content="A professional interactive quiz app covering Maths, Science, Coding, and Puzzle topics across multiple difficulty levels.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-card: #1c2230;
+    --bg-card-hover: #212a3a;
+    --accent-primary: #6366f1;
+    --accent-secondary: #8b5cf6;
+    --accent-glow: rgba(99, 102, 241, 0.3);
+    --success: #10b981;
+    --danger: #ef4444;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border: rgba(99, 102, 241, 0.2);
+    --border-subtle: rgba(255,255,255,0.06);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 50%);
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo { display: flex; align-items: center; gap: 14px; }
+  .header-logo .logo-icon {
+    width: 46px; height: 46px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 15px var(--accent-glow);
+  }
+  header h1 {
+    font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #c7d2fe, #a5b4fc, #818cf8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .header-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(99,102,241,0.15); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 50px;
+    font-size: 0.8rem; color: #a5b4fc; font-weight: 500;
+  }
+
+  /* LAYOUT */
+  .container {
+    display: flex; max-width: 1280px; margin: 30px auto;
+    gap: 22px; padding: 0 24px; align-items: flex-start;
+  }
+
+  /* SIDEBAR */
+  .sidebar { width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg); padding: 22px;
+    box-shadow: var(--shadow-card); transition: box-shadow 0.3s ease;
+  }
+  .card:hover { box-shadow: var(--shadow-card), var(--shadow-glow); }
+  .card-title {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title i { color: var(--accent-primary); font-size: 0.85rem; }
+
+  .topic-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 13px 16px; margin-bottom: 8px;
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+    background: var(--bg-secondary); color: var(--text-secondary);
+    font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: all 0.25s ease; text-align: left;
+  }
+  .topic-btn:last-of-type { margin-bottom: 0; }
+  .topic-btn .btn-icon {
+    width: 36px; height: 36px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0; transition: transform 0.25s ease;
+  }
+  .topic-btn:hover {
+    border-color: var(--accent-primary); background: var(--bg-card-hover);
+    color: var(--text-primary); transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.15);
+  }
+  .topic-btn:hover .btn-icon { transform: scale(1.15) rotate(-5deg); }
+  .topic-btn.active {
+    border-color: var(--accent-primary); background: rgba(99,102,241,0.12);
+    color: #a5b4fc; box-shadow: inset 0 0 0 1px rgba(99,102,241,0.3);
+  }
+  .topic-math    .btn-icon { background: rgba(239,68,68,0.15);  color: #f87171; }
+  .topic-science .btn-icon { background: rgba(16,185,129,0.15); color: #34d399; }
+  .topic-coding  .btn-icon { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .topic-puzzle  .btn-icon { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+  .level-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 11px 14px; margin-bottom: 7px;
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+    background: var(--bg-secondary); color: var(--text-secondary);
+    font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: all 0.22s ease; text-align: left;
+  }
+  .level-btn:last-child { margin-bottom: 0; }
+  .level-btn .level-info { display: flex; align-items: center; gap: 10px; }
+  .level-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .level-btn[data-level="basic"]        .level-dot { background: #34d399; }
+  .level-btn[data-level="easy"]         .level-dot { background: #60a5fa; }
+  .level-btn[data-level="intermediate"] .level-dot { background: #fbbf24; }
+  .level-btn[data-level="advance"]      .level-dot { background: #f97316; }
+  .level-btn[data-level="hard"]         .level-dot { background: #ef4444; }
+  .level-badge {
+    font-size: 0.65rem; font-weight: 700; padding: 2px 7px;
+    border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .level-btn[data-level="basic"]        .level-badge { background: rgba(52,211,153,0.15); color: #34d399; }
+  .level-btn[data-level="easy"]         .level-badge { background: rgba(96,165,250,0.15); color: #60a5fa; }
+  .level-btn[data-level="intermediate"] .level-badge { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .level-btn[data-level="advance"]      .level-badge { background: rgba(249,115,22,0.15); color: #f97316; }
+  .level-btn[data-level="hard"]         .level-badge { background: rgba(239,68,68,0.15);  color: #ef4444; }
+  .level-btn:hover { border-color: rgba(99,102,241,0.4); background: var(--bg-card-hover); color: var(--text-primary); }
+  .level-btn.active { border-color: var(--accent-primary); background: rgba(99,102,241,0.1); color: #a5b4fc; }
+
+  /* CONTENT */
+  .content { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  #title {
+    font-size: 1.35rem; font-weight: 700; color: var(--text-primary);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .progress-bar-wrap {
+    width: 100%; height: 4px; background: var(--border-subtle);
+    border-radius: 10px; margin-top: 10px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 10px; width: 0%; transition: width 0.4s ease;
+  }
+  .quiz-area { display: flex; flex-direction: column; gap: 18px; }
+  .question-card {
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md); padding: 20px 22px;
+    box-shadow: var(--shadow-card); transition: border-color 0.3s;
+  }
+  .question-card.answered { border-color: rgba(99,102,241,0.3); }
+  .question-text {
+    font-size: 0.95rem; font-weight: 600; color: var(--text-primary);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .q-num {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white; font-size: 0.72rem; font-weight: 700;
+    min-width: 26px; height: 26px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .option {
+    padding: 10px 14px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+    cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 500;
+    color: var(--text-secondary); background: var(--bg-secondary);
+    transition: all 0.2s ease; display: flex; align-items: center; gap: 9px;
+    text-align: left; width: 100%;
+  }
+  .option .opt-label {
+    width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s;
+    color: var(--text-muted); background: var(--bg-primary);
+  }
+  .option:hover { border-color: var(--accent-primary); background: rgba(99,102,241,0.08); color: var(--text-primary); }
+  .option:hover .opt-label { border-color: var(--accent-primary); color: #a5b4fc; background: rgba(99,102,241,0.15); }
+  .option.selected { border-color: var(--accent-primary); background: rgba(99,102,241,0.15); color: #c7d2fe; }
+  .option.selected .opt-label { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
+  .option.correct { border-color: var(--success); background: rgba(16,185,129,0.12); color: #6ee7b7; }
+  .option.correct .opt-label { background: var(--success); border-color: var(--success); color: white; }
+  .option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); color: #fca5a5; }
+  .option.wrong .opt-label { background: var(--danger); border-color: var(--danger); color: white; }
+
+  .submit-area { display: flex; justify-content: flex-end; }
+  .submit-btn {
+    display: inline-flex; align-items: center; gap: 10px; padding: 13px 28px;
+    border: none; border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.25s ease;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.5); }
+  .submit-btn:active { transform: translateY(0); }
+
+  .result-card {
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg); padding: 28px; display: none;
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+  }
+  .result-card.visible { display: block; }
+  .result-top { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 0 30px var(--accent-glow); flex-shrink: 0;
+  }
+  .score-num { font-size: 1.8rem; font-weight: 800; line-height: 1; color: white; }
+  .score-denom { font-size: 0.7rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+  .result-text h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+  .result-text p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+  .result-stats { display: flex; gap: 14px; margin-top: 22px; flex-wrap: wrap; }
+  .stat-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 50px; font-size: 0.82rem; font-weight: 600;
+  }
+  .stat-pill.correct-pill { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+  .stat-pill.wrong-pill   { background: rgba(239,68,68,0.1);  color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .stat-pill.pct-pill     { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); }
+  .chart-wrap { margin-top: 22px; display: flex; justify-content: center; }
+  .chart-wrap canvas { max-width: 220px; }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 60px 20px; gap: 14px; color: var(--text-muted);
+  }
+  .empty-state .empty-icon { font-size: 3rem; opacity: 0.4; }
+  .empty-state h3 { font-size: 1.1rem; color: var(--text-secondary); font-weight: 600; }
+  .empty-state p { font-size: 0.875rem; max-width: 280px; line-height: 1.6; }
+
+  /* RIGHT PANEL */
+  .right-panel { width: 230px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+  .info-card {
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow-card);
+  }
+  .info-card h4 {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .info-card h4 i { color: var(--accent-primary); }
+  .tip-item { display: flex; gap: 10px; margin-bottom: 14px; align-items: flex-start; }
+  .tip-item:last-child { margin-bottom: 0; }
+  .tip-item i { color: var(--accent-primary); margin-top: 2px; font-size: 0.85rem; flex-shrink: 0; }
+  .tip-item p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+  .subject-pill {
+    display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+    border-radius: var(--radius-sm); margin-bottom: 8px;
+    font-size: 0.82rem; font-weight: 500; color: var(--text-secondary);
+    background: var(--bg-secondary); border: 1px solid var(--border-subtle);
+  }
+  .subject-pill:last-child { margin-bottom: 0; }
+  .subject-pill.math-pill    i { color: #f87171; }
+  .subject-pill.science-pill i { color: #34d399; }
+  .subject-pill.coding-pill  i { color: #60a5fa; }
+  .subject-pill.puzzle-pill  i { color: #fbbf24; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 4px; }
+
+  @media (max-width: 900px) {
+    .container { flex-direction: column; }
+    .sidebar, .right-panel { width: 100%; }
+    .options-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+    <h1>Interactive Quiz App</h1>
+  </div>
+  <div class="header-badge">
+    <i class="fa-solid fa-circle" style="color:#34d399;font-size:0.5rem;"></i>
+    Student Learning Platform
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-layer-group"></i> Subject Areas</div>
+      <button class="topic-btn topic-math" id="btn-math" onclick="setTopic('math')">
+        <span class="btn-icon"><i class="fa-solid fa-square-root-variable"></i></span>
+        Mathematics
+      </button>
+      <button class="topic-btn topic-science" id="btn-science" onclick="setTopic('science')">
+        <span class="btn-icon"><i class="fa-solid fa-flask-vial"></i></span>
+        Science
+      </button>
+      <button class="topic-btn topic-coding" id="btn-coding" onclick="setTopic('coding')">
+        <span class="btn-icon"><i class="fa-solid fa-code"></i></span>
+        Coding
+      </button>
+      <button class="topic-btn topic-puzzle" id="btn-puzzle" onclick="setTopic('puzzle')">
+        <span class="btn-icon"><i class="fa-solid fa-puzzle-piece"></i></span>
+        Puzzles
+      </button>
+    </div>
+
+    <div class="card" id="levels-card" style="display:none;">
+      <div class="card-title"><i class="fa-solid fa-signal"></i> Difficulty</div>
+      <div id="levels"></div>
+    </div>
+  </div>
+
+  <!-- CENTER CONTENT -->
+  <div class="content">
+    <div class="card">
+      <h2 id="title">
+        <i class="fa-solid fa-book-open" style="color:var(--accent-primary);font-size:1rem;"></i>
+        Select a Subject
+      </h2>
+      <div class="progress-bar-wrap" id="progress-wrap" style="display:none;">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon"><i class="fa-solid fa-circle-question"></i></div>
+        <h3>No quiz loaded yet</h3>
+        <p>Choose a subject from the left panel, then pick a difficulty level to begin.</p>
+      </div>
+      <div class="quiz-area" id="quiz" style="padding:22px;display:none;"></div>
+    </div>
+
+    <div class="submit-area" id="submit-area" style="display:none;">
+      <button class="submit-btn" onclick="submitQuiz()">
+        <i class="fa-solid fa-paper-plane"></i> Submit Quiz
+      </button>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-top">
+        <div class="score-circle">
+          <span class="score-num" id="score-num">0</span>
+          <span class="score-denom">/ 10</span>
+        </div>
+        <div class="result-text">
+          <h3 id="result-msg">—</h3>
+          <p id="result-sub">Your performance breakdown is shown below.</p>
+        </div>
+      </div>
+      <div class="result-stats">
+        <div class="stat-pill correct-pill">
+          <i class="fa-solid fa-circle-check"></i> <span id="stat-correct-val">0 correct</span>
+        </div>
+        <div class="stat-pill wrong-pill">
+          <i class="fa-solid fa-circle-xmark"></i> <span id="stat-wrong-val">0 wrong</span>
+        </div>
+        <div class="stat-pill pct-pill">
+          <i class="fa-solid fa-chart-pie"></i> <span id="stat-pct">0%</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="info-card">
+      <h4><i class="fa-solid fa-lightbulb"></i> How It Works</h4>
+      <div class="tip-item"><i class="fa-solid fa-hand-pointer"></i><p>Pick a subject area from the left panel.</p></div>
+      <div class="tip-item"><i class="fa-solid fa-signal"></i><p>Select a difficulty level.</p></div>
+      <div class="tip-item"><i class="fa-solid fa-pen-to-square"></i><p>Answer all 10 questions.</p></div>
+      <div class="tip-item"><i class="fa-solid fa-paper-plane"></i><p>Submit to see your score and feedback.</p></div>
+    </div>
+    <div class="info-card">
+      <h4><i class="fa-solid fa-book-bookmark"></i> Subjects</h4>
+      <div class="subject-pill math-pill"><i class="fa-solid fa-square-root-variable"></i> Mathematics</div>
+      <div class="subject-pill science-pill"><i class="fa-solid fa-flask-vial"></i> Science</div>
+      <div class="subject-pill coding-pill"><i class="fa-solid fa-code"></i> Coding</div>
+      <div class="subject-pill puzzle-pill"><i class="fa-solid fa-puzzle-piece"></i> Puzzles</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let topic="", level="", currentQuiz=[], answers={}, chartInstance;
+  const optionLabels = ["A","B","C","D"];
+  const levelConfig = {
+    basic:        { label:"Basic",        icon:"fa-seedling", badge:"Starter" },
+    easy:         { label:"Easy",         icon:"fa-star",     badge:"Easy"    },
+    intermediate: { label:"Intermediate", icon:"fa-fire",     badge:"Medium"  },
+    advance:      { label:"Advanced",     icon:"fa-bolt",     badge:"Hard"    },
+    hard:         { label:"Hard",         icon:"fa-skull",    badge:"Expert"  },
+  };
+  const topicIcons  = { math:"fa-square-root-variable", science:"fa-flask-vial", coding:"fa-code", puzzle:"fa-puzzle-piece" };
+  const topicLabels = { math:"Mathematics", science:"Science", coding:"Coding", puzzle:"Puzzles" };
+
+  const data = {
+    math: {
+      basic:        [{q:"What is 2 + 2?",       o:["3","4","5","6"],           a:1}],
+      easy:         [{q:"What is 5 + 7?",        o:["10","11","12","13"],       a:2}],
+      intermediate: [{q:"What is 12 × 2?",       o:["22","24","26","28"],       a:1}],
+      advance:      [{q:"What is 25 ÷ 5?",       o:["3","4","5","6"],           a:2}],
+      hard:         [{q:"What is √49?",           o:["5","6","7","8"],           a:2}]
+    },
+    science: {
+      basic:        [{q:"Formula for water?",     o:["H₂O","CO₂","O₂","NaCl"],          a:0}],
+      easy:         [{q:"The Sun is a ___?",      o:["Planet","Star","Moon","Rock"],      a:1}],
+      intermediate: [{q:"Gas humans breathe?",    o:["Oxygen","CO₂","Nitrogen","Helium"], a:0}],
+      advance:      [{q:"SI unit of force?",      o:["Newton","Watt","Volt","Amp"],       a:0}],
+      hard:         [{q:"SI unit of speed?",      o:["m/s","kg","N","J"],                a:0}]
+    },
+    coding: {
+      basic:        [{q:"HTML stands for?",       o:["Hyper Text Markup Language","High Text Machine Language","Hyper Transfer Mode Language","None"], a:0}],
+      easy:         [{q:"CSS is used for?",       o:["Styling","Logic","Database","Networking"],                                                       a:0}],
+      intermediate: [{q:"JavaScript is a ___?",   o:["Programming Language","Operating System","Database","Hardware"],                                  a:0}],
+      advance:      [{q:"Keyword for a loop?",    o:["for","if","let","var"],             a:0}],
+      hard:         [{q:"An array stores ___?",   o:["Multiple values","One value","No value","Only text"], a:0}]
+    },
+    puzzle: {
+      basic:        [{q:"Keys but no locks?",     o:["Keyboard","Door","Car","Map"],     a:0}],
+      easy:         [{q:"Hands but no clap?",     o:["Clock","Human","Dog","Robot"],     a:0}],
+      intermediate: [{q:"Neck but no head?",      o:["Bottle","Tree","Shirt","River"],   a:0}],
+      advance:      [{q:"Speaks without mouth?",  o:["Echo","Wind","Radio","Bell"],      a:0}],
+      hard:         [{q:"Runs but never walks?",  o:["Water","Car","Dog","Wind"],        a:0}]
+    }
+  };
+
+  function expand(arr){ const r=[]; for(let i=0;i<10;i++) r.push({...arr[i%arr.length]}); return r; }
+
+  function setTopic(t){
+    topic=t; level=""; answers={};
+    document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('btn-'+t).classList.add('active');
+    const lc=document.getElementById('levels-card'); lc.style.display='block';
+    const ld=document.getElementById('levels'); ld.innerHTML='';
+    Object.entries(levelConfig).forEach(([key,cfg])=>{
+      const btn=document.createElement('button');
+      btn.className='level-btn'; btn.dataset.level=key; btn.id='level-btn-'+key;
+      btn.innerHTML=`<div class="level-info"><span class="level-dot"></span><i class="fa-solid ${cfg.icon}" style="font-size:.8rem;margin-right:2px;"></i>${cfg.label}</div><span class="level-badge">${cfg.badge}</span>`;
+      btn.onclick=()=>loadQuiz(key); ld.appendChild(btn);
+    });
+    document.getElementById('title').innerHTML=`<i class="fa-solid ${topicIcons[t]}" style="color:var(--accent-primary);font-size:1rem;"></i> Select Difficulty`;
+    document.getElementById('quiz').style.display='none';
+    document.getElementById('empty-state').style.display='flex';
+    document.getElementById('submit-area').style.display='none';
+    document.getElementById('result-card').classList.remove('visible');
+    document.getElementById('progress-wrap').style.display='none';
+  }
+
+  function loadQuiz(l){
+    level=l; currentQuiz=expand(data[topic][level]); answers={};
+    document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('active'));
+    const lb=document.getElementById('level-btn-'+l); if(lb) lb.classList.add('active');
+    document.getElementById('title').innerHTML=`<i class="fa-solid ${topicIcons[topic]}" style="color:var(--accent-primary);font-size:1rem;"></i> ${topicLabels[topic]} <span style="color:var(--text-muted);font-weight:400;font-size:.9rem;">— ${levelConfig[l].label}</span>`;
+    document.getElementById('progress-wrap').style.display='block';
+    document.getElementById('progress-bar').style.width='0%';
+    const qd=document.getElementById('quiz'); qd.innerHTML=''; qd.style.display='flex';
+    document.getElementById('empty-state').style.display='none';
+    currentQuiz.forEach((q,i)=>{
+      const card=document.createElement('div'); card.classList.add('question-card'); card.id='qcard-'+i;
+      const qt=document.createElement('div'); qt.classList.add('question-text');
+      qt.innerHTML=`<span class="q-num">${i+1}</span><span>${q.q}</span>`; card.appendChild(qt);
+      const grid=document.createElement('div'); grid.classList.add('options-grid');
+      q.o.forEach((opt,idx)=>{
+        const btn=document.createElement('button'); btn.classList.add('option');
+        btn.innerHTML=`<span class="opt-label">${optionLabels[idx]}</span>${opt}`;
+        btn.onclick=()=>{
+          answers[i]=idx; card.classList.add('answered');
+          card.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+          btn.classList.add('selected'); updateProgress();
+        };
+        grid.appendChild(btn);
+      });
+      card.appendChild(grid); qd.appendChild(card);
+    });
+    document.getElementById('submit-area').style.display='flex';
+    document.getElementById('result-card').classList.remove('visible');
+  }
+
+  function updateProgress(){
+    document.getElementById('progress-bar').style.width=(Object.keys(answers).length/10*100)+'%';
+  }
+
+  function submitQuiz(){
+    if(!Object.keys(answers).length){ alert('Answer at least one question first!'); return; }
+    let score=0;
+    currentQuiz.forEach((q,i)=>{
+      const opts=document.getElementById('qcard-'+i).querySelectorAll('.option');
+      opts.forEach(o=>o.classList.remove('selected'));
+      if(answers[i]===q.a){ score++; opts[q.a].classList.add('correct'); }
+      else{ if(answers[i]!==undefined) opts[answers[i]].classList.add('wrong'); opts[q.a].classList.add('correct'); }
+    });
+    const msgs=[
+      [9,"Outstanding! 🏆","Perfect — you've mastered this level!"],
+      [8,"Excellent Work! 🎉","Impressive — you really know your stuff."],
+      [6,"Good Job! 👍","Solid — review a few missed answers."],
+      [4,"Keep Practicing! 💪","Getting there — revisit and try again."],
+      [0,"Keep Learning! 📖","Don't give up — review and try again."]
+    ];
+    const [,msg,sub]=msgs.find(([min])=>score>=min);
+    document.getElementById('score-num').textContent=score;
+    document.getElementById('result-msg').textContent=msg;
+    document.getElementById('result-sub').textContent=sub;
+    document.getElementById('stat-correct-val').textContent=score+' correct';
+    document.getElementById('stat-wrong-val').textContent=(10-score)+' wrong';
+    document.getElementById('stat-pct').textContent=(score*10)+'%';
+    document.getElementById('result-card').classList.add('visible');
+    const ctx=document.getElementById('chart').getContext('2d');
+    if(chartInstance) chartInstance.destroy();
+    chartInstance=new Chart(ctx,{type:'doughnut',data:{labels:['Correct','Incorrect'],datasets:[{data:[score,10-score],backgroundColor:['rgba(16,185,129,0.85)','rgba(239,68,68,0.75)'],borderColor:['#059669','#dc2626'],borderWidth:2,hoverOffset:8}]},options:{cutout:'65%',plugins:{legend:{labels:{color:'#94a3b8',font:{family:'Inter',size:12}}}},animation:{animateRotate:true,duration:700}}});
+    document.getElementById('result-card').scrollIntoView({behavior:'smooth',block:'start'});
+    document.getElementById('progress-bar').style.width='100%';
+  }
+</script>
+</body>
+</html>
